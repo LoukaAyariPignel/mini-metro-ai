@@ -82,6 +82,54 @@ d'apprentissage est dans `logs/train_log.csv` (score et survie par épisode).
 Pour la pousser plus loin : entraîner plus longtemps (`--episodes 2000`),
 agrandir le réseau dans `agents/dqn.py`, ou passer à PPO.
 
+## Jouer sur la vraie appli Android (Pixel 7a, sans root) 📱
+
+L'IA peut piloter le vrai jeu du Play Store via ADB : capture d'écran →
+vision OpenCV → décision de l'agent → geste tactile injecté. **Aucun root
+n'est nécessaire**, seulement le débogage USB.
+
+### Mise en place (une seule fois)
+
+1. Sur le téléphone : *Paramètres > À propos du téléphone* → taper 7 fois sur
+   **Numéro de build** pour activer les Options développeur.
+2. *Options développeur* → activer **Débogage USB**.
+3. Sur le PC : installer adb (`sudo apt install adb` ou
+   [platform-tools](https://developer.android.com/tools/releases/platform-tools)).
+4. Brancher le téléphone en USB, accepter l'autorisation, vérifier avec
+   `adb devices`.
+
+### Calibration puis jeu
+
+```bash
+# 1. Lancer Mini Metro sur le téléphone, démarrer une partie, puis :
+python3 run_android.py --capture-only        # sauve des captures dans captures/
+
+# 2. Vérifier ce que l'IA "voit" (produit des images annotées) :
+python3 run_android.py --dry-run captures/raw_*.png
+
+# 3. Si les détections sont bonnes, laisser l'IA observer sans agir :
+python3 run_android.py --agent greedy --no-act
+
+# 4. Puis la laisser jouer pour de vrai :
+python3 run_android.py --agent greedy        # heuristique (robuste, recommandé)
+python3 run_android.py --agent dqn           # modèle appris en simulation
+```
+
+Si la vision se trompe (thème sombre, autre carte…), ajustez les seuils dans
+`android/vision.py` (`VisionConfig`) à partir des images annotées de l'étape 2
+— c'est prévu pour : couleurs des lignes en HSV, tailles de formes, seuils de
+luminosité.
+
+### Limites connues
+
+- `adb screencap` donne ~1 image/s : suffisant, l'IA décide toutes les 2 s.
+- Les destinations des passagers (la petite forme qu'ils portent) sont trop
+  petites pour être lues de façon fiable : l'heuristique utilise le nombre de
+  passagers en attente, ce qui suffit pour bien jouer.
+- Le DQN a été entraîné en simulation ; l'écart sim→réel fait que l'agent
+  `greedy` est recommandé sur le vrai jeu. Les récompenses hebdomadaires
+  (choix train/ligne) doivent être validées à la main pour l'instant.
+
 ## Structure
 
 ```
@@ -92,7 +140,12 @@ agents/
   random_agent.py
   greedy_agent.py
   dqn.py     # Double DQN + replay buffer
+android/
+  adb_io.py  # capture d'écran + gestes tactiles via ADB (sans root)
+  vision.py  # détection stations/lignes/passagers (OpenCV)
+  bridge.py  # état vu à l'écran -> décision -> geste
 train.py     # boucle d'entraînement
 evaluate.py  # comparaison des agents
 play.py      # visualisation ASCII d'une partie
+run_android.py # faire jouer l'IA sur le téléphone
 ```
