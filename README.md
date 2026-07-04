@@ -68,17 +68,19 @@ python3 play.py --agent dqn
 
 ## Résultats
 
-Sur 20 parties identiques (mêmes graines), après 250 épisodes d'entraînement :
+Sur 20 parties identiques (mêmes graines), mesuré avec `evaluate.py` :
 
-| Agent | Score moyen | Survie moyenne |
-|---|---|---|
-| Aléatoire | ~35 | ~400 s (meurt vite) |
-| DQN (250 ép.) | voir `logs/train_log.csv` | — |
-| Glouton | ~715 | 1800 s (survit tout l'épisode) |
+| Agent | Score moyen | Survie moyenne | Meilleur score |
+|---|---|---|---|
+| Aléatoire | 42.6 ± 35.8 | 442 s (meurt vite) | 123 |
+| DQN (250 épisodes, ~5 min CPU) | 137.4 ± 56.0 | 710 s | 277 |
+| Glouton | 670.4 ± 158.0 | 1724 s | 763 |
 
-La courbe d'apprentissage est dans `logs/train_log.csv` (score et survie par
-épisode). Pour pousser l'IA plus loin : entraîner plus longtemps
-(`--episodes 2000`), agrandir le réseau dans `agents/dqn.py`, ou passer à PPO.
+Après seulement 250 épisodes, l'IA a appris seule à tripler le score de
+l'agent aléatoire et à survivre presque deux fois plus longtemps. La courbe
+d'apprentissage est dans `logs/train_log.csv` (score et survie par épisode).
+Pour la pousser plus loin : entraîner plus longtemps (`--episodes 2000`),
+agrandir le réseau dans `agents/dqn.py`, ou passer à PPO.
 
 ## Structure
 
