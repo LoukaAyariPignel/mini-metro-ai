@@ -77,10 +77,15 @@ Sur 20 parties identiques (mêmes graines), mesuré avec `evaluate.py` :
 | Glouton | 670.4 ± 158.0 | 1724 s | 763 |
 
 Après seulement 250 épisodes, l'IA a appris seule à tripler le score de
-l'agent aléatoire et à survivre presque deux fois plus longtemps. La courbe
-d'apprentissage est dans `logs/train_log.csv` (score et survie par épisode).
-Pour la pousser plus loin : entraîner plus longtemps (`--episodes 2000`),
-agrandir le réseau dans `agents/dqn.py`, ou passer à PPO.
+l'agent aléatoire et à survivre presque deux fois plus longtemps. Les courbes
+d'apprentissage sont dans `logs/` (score et survie par épisode).
+
+Note honnête : un second entraînement de 1000 épisodes
+(`logs/train_log_1000ep.csv`) a culminé vers l'épisode 500 puis s'est effondré
+— l'instabilité classique du DQN (oubli catastrophique). Le checkpoint de 250
+épisodes reste donc le meilleur. Pistes pour dépasser l'heuristique gloutonne :
+décroissance du taux d'apprentissage, replay priorisé, ou passer à PPO
+(nettement plus stable sur ce genre de tâche).
 
 ## Jouer sur la vraie appli Android (Pixel 7a, sans root) 📱
 
