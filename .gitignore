@@ -1,0 +1,4 @@
+__pycache__/
+*.pyc
+logs_train_stdout.txt
+models/*_final.pt
