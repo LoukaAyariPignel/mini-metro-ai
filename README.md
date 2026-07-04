@@ -125,6 +125,53 @@ Si la vision se trompe (thème sombre, autre carte…), ajustez les seuils dans
 — c'est prévu pour : couleurs des lignes en HSV, tailles de formes, seuils de
 luminosité.
 
+### 100 % autonome sur le téléphone (sans PC) 🔋
+
+Le téléphone peut se piloter lui-même : `adb` tourne **dans Termux** et se
+connecte au téléphone via le *débogage sans fil* (Android 11+). Toujours sans
+root. Le jeu est au premier plan, Termux capture l'écran et injecte les
+gestes depuis l'arrière-plan. PyTorch n'existant pas sur Termux, l'agent DQN
+y tourne en inférence numpy pure (`models/dqn_weights.npz`, généré par
+`export_weights.py` — déjà inclus dans le repo).
+
+#### Installation (une seule fois)
+
+1. Installer **Termux depuis F-Droid** (https://f-droid.org/packages/com.termux/
+   — pas le Play Store, cette version est abandonnée).
+2. Dans Termux :
+   ```bash
+   pkg install -y git
+   git clone https://github.com/LoukaAyariPignel/mini-metro-ai.git
+   cd mini-metro-ai
+   bash termux/setup.sh
+   ```
+3. Activer les *Options développeur* puis **Débogage sans fil** (pas besoin
+   du débogage USB ici).
+4. **Appairage** (une seule fois) : mettre Termux et les Paramètres en
+   **écran partagé** (la fenêtre d'appairage se ferme si on change d'appli).
+   Dans *Débogage sans fil > Associer l'appareil à l'aide d'un code*, un
+   code à 6 chiffres et un port s'affichent. Dans Termux :
+   ```bash
+   adb pair localhost:PORT_APPAIRAGE   # puis taper le code à 6 chiffres
+   ```
+5. Recommandé : dans les paramètres Android, exempter Termux de
+   l'optimisation de batterie (sinon Android peut tuer l'IA en pleine partie).
+
+#### Jouer
+
+```bash
+# 1. Vérifier que "Débogage sans fil" est actif (il se désactive au redémarrage)
+# 2. Dans Termux :
+bash termux/play.sh              # se connecte, attend 8 s, l'IA joue (glouton)
+bash termux/play.sh dqn          # avec le modèle appris (inférence numpy)
+bash termux/play.sh greedy --no-act   # observer sans toucher (test)
+# 3. Basculer sur Mini Metro et lancer une partie : l'IA prend la main.
+```
+
+Le script demande le port de connexion la première fois (affiché sur l'écran
+*Débogage sans fil*, ex. `37099` dans `192.168.1.10:37099`). L'appairage
+survit aux redémarrages, la connexion non : relancer `play.sh` suffit.
+
 ### Limites connues
 
 - `adb screencap` donne ~1 image/s : suffisant, l'IA décide toutes les 2 s.
@@ -149,6 +196,11 @@ android/
   adb_io.py  # capture d'écran + gestes tactiles via ADB (sans root)
   vision.py  # détection stations/lignes/passagers (OpenCV)
   bridge.py  # état vu à l'écran -> décision -> geste
+termux/
+  setup.sh   # installation sur le téléphone (Termux, sans PC)
+  play.sh    # connexion adb sans fil + lancement de l'IA
+agents/dqn_numpy.py  # inférence DQN sans PyTorch (pour Termux)
+export_weights.py    # export du modèle PyTorch en .npz numpy
 train.py     # boucle d'entraînement
 evaluate.py  # comparaison des agents
 play.py      # visualisation ASCII d'une partie

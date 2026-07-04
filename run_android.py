@@ -96,9 +96,14 @@ def main() -> None:
             time.sleep(2.0)
 
     if args.agent == "dqn":
-        from agents.dqn import DQNAgent
-        agent = DQNAgent()
-        agent.load(args.model)
+        try:
+            from agents.dqn import DQNAgent
+            agent = DQNAgent()
+            agent.load(args.model)
+        except ImportError:  # pas de torch (Termux) : inférence numpy
+            from agents.dqn_numpy import NumpyDQN
+            agent = NumpyDQN(args.model.replace(".pt", "_weights.npz"))
+            print("PyTorch absent : inférence numpy (models/dqn_weights.npz).")
     else:
         agent = GreedyAgent()
 
